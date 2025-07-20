@@ -1,111 +1,142 @@
-# Earth-Observation
+# Land Cover Classification over Delhi-NCR using Satellite Imagery
 
-# Land Cover Classification using Satellite Imagery (Delhi-NCR)
+This repository contains a complete pipeline for performing supervised land cover classification using RGB satellite imagery and ESA for the Delhi-NCR region. 
+---
 
-This repository contains a complete pipeline for classifying land cover types over the Delhi-NCR region using high-resolution RGB satellite images and deep learning.
+## Project Tasks Overview
+
+This project addresses the following core tasks:
+
+- **Q1**: Grid Construction and Image Filtering using shapefiles and geospatial mapping.
+- **Q2**: Patch Extraction and Land Cover Labeling using ESA WorldCover raster.
+- **Q3**: Supervised Evaluation using a deep learning classifier and multiple evaluation metrics.
 
 ---
 
-## Overview
+## Objectives
 
-We use spatial and raster data to:
-
-* Filter relevant image tiles based on geographic bounds
-* Extract land cover labels from ESA WorldCover 2021 data
-* Train a ResNet18 model on RGB tiles
-* Evaluate model performance using F1 scores, confusion matrix, and visual samples
+- Learn to manipulate vector and raster geospatial data using GeoPandas and RasterIO.
+- Generate structured image-label pairs for training from raw satellite and land cover data.
+- Train a convolutional neural network (ResNet18) for multiclass classification.
+- Evaluate model performance using F1 scores, classification reports, and confusion matrices.
 
 ---
 
-## Project Objectives
+## Workflow Summary
 
-* Learn to preprocess geospatial vector and raster data
-* Build a supervised image classification dataset from scratch
-* Train a CNN model to classify satellite images
-* Visualize prediction performance and confusion
+1. **Geo-filtering and Grid Overlay**:
+   - Reprojected Delhi-NCR boundary to UTM (EPSG:32643) for accurate distance-based grid creation.
+   - Created a uniform 60×60 km grid and **stored all cell corners properly** for downstream spatial filtering.
+   - The issue in earlier versions where grid corners were not fully captured (due to a misplaced extend() call) has been corrected.
+
+2. **Dataset Creation and Labeling (Q2)**  
+   - 128×128 pixel patches were extracted from ESA WorldCover 2021 raster, centered at the image coordinates.
+   - Each patch was assigned a label based on the dominant land cover class (≥60% occurrence).
+   - Patches without a clear dominant class or with no-data pixels were discarded.
+   - Class distribution was visualized using bar plots to highlight imbalance.
+   - A 60/40 train-test split was performed with stratification.
+
+3. **Model Training and Evaluation (Q3)**  
+   - A pre-trained ResNet18 model was fine-tuned on the RGB image dataset.
+   - The model was trained for 5 epochs using CrossEntropyLoss and Adam optimizer.
+   - Evaluation metrics included accuracy, macro F1 score, and a confusion matrix.
+   - Torchmetrics was used alongside Scikit-learn to validate the F1 score.
+
+4. **Labeling**:
+   - Extracted land cover class codes from ESA WorldCover `.tif` raster patches.
+   - Mapped ESA class codes to 11 standardized land cover labels (e.g., 10 → "Tree Cover", 50 → "Built-up") using a predefined dictionary.
+   - Only assigned labels where the dominant class (>60%) was present in the patch.
+For example: ESA Class Mapping
+ESA WorldCover codes were mapped as follows:
+
+| ESA Code | Class Name     |
+|----------|----------------|
+| 10       | Tree Cover     |
+| 20       | Shrubland      |
+| 30       | Grassland      |
+| 40       | Cropland       |
+| 50       | Built-up       |
+| 60       | Bare/Sparse    |
+| 70       | Snow/Ice       |
+| 80       | Wetlands       |
+| 90       | Water          |
+| 95       | Tundra         |
+| 100      | Mangroves      |
+
 
 ---
 
-## Folder Structure
+## Results
 
-```
-EarthObs/
-├── delhi_ncr_region.geojson         # Vector boundary of Delhi-NCR
-├── delhi_airshed.geojson            # Larger airshed region (optional)
-├── worldcover_bbox_delhi_ncr_2021.tif  # ESA WorldCover raster
-├── rgb/                             # 128x128 image tiles (named by lat_lon)
-└── train_eval.ipynb                 # Full Colab-compatible training pipeline
-```
+| Metric              | Value      |
+|---------------------|------------|
+| Training Accuracy   | 98.8%      |
+| Test Accuracy       | 98.0%      |
+| Macro F1 Score      | 0.7265     |
+
+- Best performance was observed for **Cropland** and **Built-up** classes.
+- Some misclassifications occurred in **Shrubland** and **Tree Cover** due to class imbalance.
+- Visualizations included heatmaps and class-wise confusion matrices.
+
+---
+
+## Tools and Libraries
+
+- PyTorch, torchvision, torchmetrics
+- GeoPandas, RasterIO, Shapely
+- Leafmap (for satellite basemap visualization)
+- Scikit-learn, Seaborn, Matplotlib
+
+---
 
 ---
 
 ## Data Sources
 
-* Planet
-* RGB image patches with geospatial naming (e.g. `28.5355_77.3910.png`)
-* Regional boundaries (GeoJSON)
+- **RGB Satellite Images**: Downloaded patches with geospatial filenames (e.g., 28.6129_77.2295.png)
+- **ESA WorldCover 2021**: Used for labeling based on land cover classes
+- **Delhi-NCR GeoJSON**: Provided shapefile for spatial filtering and overlay
 
 ---
 
-## How It Works
-
-1. **Geo-filtering**: Read and project NCR shapefile, overlay a 60x60 km grid
-2. **Image selection**: Parse lat/lon from filenames and select images within bounds
-3. **Label extraction**: Use rasterio to crop 128x128 patches from `.tif` raster
-4. **Labeling**: Assign ESA class code based on dominant class in the patch
-5. **Training**: Train ResNet18 on the RGB image-label pairs
-6. **Evaluation**: Report accuracy, macro F1, confusion matrix, and prediction samples
-
----
-
-## Model
-
-* **Architecture**: ResNet18 (pretrained)
-* **Input**: 128x128 RGB images
-* **Output**: 8-class classification based on ESA land cover
-* **Tools**: PyTorch, torchvision, torchmetrics, matplotlib, seaborn
-
----
-
-## Quick Start (Colab)
-
-```python
-# Mount Drive
+## How to Run (Google Colab)
+# Mount Google Drive
 from google.colab import drive
 drive.mount('/content/drive')
-
-# Follow steps in train_eval.ipynb
-```
+And run the python file.
 
 ---
 
-## Sample Results
+## Class Distribution and Imbalance Analysis
 
-* Train Accuracy: 92.9%
-* Test Accuracy: 64.0%
-* Macro F1 Score: \~0.22
-* Strongest performance on Cropland and Built-up
-* Most confusion occurs on minority classes
+After filtering and labeling, we visualized the distribution of land cover classes across the dataset using a bar plot.
 
----
+- A total of 6,563 patches were retained after applying a dominance threshold (≥60%).
+- Classes like **Cropland** and **Built-up** dominated the dataset, with thousands of examples.
+- Other classes such as **Shrubland**, **Tree Cover**, and especially **Grassland** and **Wetlands** were underrepresented or nearly absent.
 
-## To Improve
+This imbalance can affect model generalization, especially for rare classes. Although we used stratified sampling for the train-test split, future work should include:
 
-* Use multispectral or NDVI bands
-* Augment underrepresented classes
-* Explore temporal or higher resolution datasets
+- Data augmentation for minority classes
+- Class weighting during training
+- Sampling techniques like SMOTE for balancing
+A sample visualization of the class distribution (generated with Seaborn) is in the folder.
 
----
+- Evaluation metrics include accuracy, macro F1-score, and confusion matrix.
+- The macro F1-score was computed using both a custom implementation and the torchmetrics library to ensure correctness and consistency.
 
-## Contributors
-
-* Built by: \[Your Name / Team Name]
-* License: MIT
-
----
-
-## Acknowledgements
-
-* ESA WorldCover 2021
-* PyTorch & torchvision
-* GeoPandas, Rasterio, Seaborn
+The confusion matrix compares actual versus predicted labels for five major ESA WorldCover land classes: Built-up, Cropland, Grassland, Shrubland, and Tree Cover. The results show:
+       1.   High accuracy for dominant classes:
+       2.   Cropland and Built-up classes are classified with strong accuracy. Out of 1933 Cropland samples, 1896 were correctly predicted.
+       3.   Misclassifications in less represented classes:
+       4.   Grassland had no correct predictions — all five samples were confused with either Built-up or Shrubland.
+       5.   Tree Cover was sometimes confused with Shrubland (12 out of 57 cases).
+       6.   Moderate confusion occurred between urban (Built-up) and peri-urban (Cropland or Shrubland) areas, suggesting texture-based overlaps in RGB imagery.
+The confusion matrix validates that:
+      The model has learned dominant land classes well, supported by high diagonal values.
+      However, minority class performance remains limited, especially for Grassland, which lacks enough examples to generalize.
+      The misclassification trends also indicate that some ESA classes share visual features when represented as 128×128 RGB patches.
+      To improve performance on underrepresented classes, further steps may include:
+      Data augmentation for low-sample classes
+      Applying class reweighting or focal loss
+      Incorporating additional spectral bands or vegetation indices
