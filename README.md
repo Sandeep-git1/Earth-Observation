@@ -140,3 +140,16 @@ The confusion matrix validates that:
       Data augmentation for low-sample classes
       Applying class reweighting or focal loss
       Incorporating additional spectral bands or vegetation indices
+
+Confusion Matrix Analysis
+The confusion matrix compares actual versus predicted labels for five major ESA WorldCover land classes: Built-up, Cropland, Grassland, Shrubland, and Tree Cover. The results show:
+Performance Highlights
+1. High accuracy for dominant classes: Cropland and Built-up classes are classified with strong accuracy. Out of 1933 Cropland samples, 1896 were correctly predicted.
+2. Misclassifications in less represented classes: Grassland had no correct predictions — all five samples were confused with either Built-up or Shrubland. Tree Cover was sometimes confused with Shrubland (12 out of 57 cases).
+
+Moderate confusion in transitional regions:
+1. Confusion occurred between urban (Built-up) and peri-urban (Cropland or Shrubland) areas, suggesting texture-based overlaps in RGB imagery.
+2. Validation from the Matrix
+3. The model has learned dominant land classes well, as reflected by high diagonal values.
+4. However, minority class performance is limited, especially for Grassland, which lacks enough examples to generalize.
+5. The misclassification trends indicate visual similarities between some ESA classes, particularly when represented using only RGB bands in 128×128 patches.
