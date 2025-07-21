@@ -129,6 +129,7 @@ A sample visualization of the class distribution (generated with Seaborn) is in 
 ## Confusion Matrix Analysis
 The confusion matrix compares actual versus predicted labels for five major ESA WorldCover land classes: Built-up, Cropland, Grassland, Shrubland, and Tree Cover. 
 The results show:
+
 A. Performance Highlights:
 1. High accuracy for dominant classes: Cropland and Built-up classes are classified with strong accuracy. Out of 1933 Cropland samples, 1896 were correctly predicted.
 2. Misclassifications in less represented classes: Grassland had no correct predictions — all five samples were confused with either Built-up or Shrubland. Tree Cover was sometimes confused with Shrubland (12 out of 57 cases).
