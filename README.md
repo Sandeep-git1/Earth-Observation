@@ -125,23 +125,8 @@ A sample visualization of the class distribution (generated with Seaborn) is in 
 - Evaluation metrics include accuracy, macro F1-score, and confusion matrix.
 - The macro F1-score was computed using both a custom implementation and the torchmetrics library to ensure correctness and consistency.
 
-The confusion matrix compares actual versus predicted labels for five major ESA WorldCover land classes: Built-up, Cropland, Grassland, Shrubland, and Tree Cover. The results show:
-       1.   High accuracy for dominant classes:
-       2.   Cropland and Built-up classes are classified with strong accuracy. Out of 1933 Cropland samples, 1896 were correctly predicted.
-       3.   Misclassifications in less represented classes:
-       4.   Grassland had no correct predictions — all five samples were confused with either Built-up or Shrubland.
-       5.   Tree Cover was sometimes confused with Shrubland (12 out of 57 cases).
-       6.   Moderate confusion occurred between urban (Built-up) and peri-urban (Cropland or Shrubland) areas, suggesting texture-based overlaps in RGB imagery.
-The confusion matrix validates that:
-      The model has learned dominant land classes well, supported by high diagonal values.
-      However, minority class performance remains limited, especially for Grassland, which lacks enough examples to generalize.
-      The misclassification trends also indicate that some ESA classes share visual features when represented as 128×128 RGB patches.
-      To improve performance on underrepresented classes, further steps may include:
-      Data augmentation for low-sample classes
-      Applying class reweighting or focal loss
-      Incorporating additional spectral bands or vegetation indices
 
-Confusion Matrix Analysis
+## Confusion Matrix Analysis
 The confusion matrix compares actual versus predicted labels for five major ESA WorldCover land classes: Built-up, Cropland, Grassland, Shrubland, and Tree Cover. The results show:
 Performance Highlights
 1. High accuracy for dominant classes: Cropland and Built-up classes are classified with strong accuracy. Out of 1933 Cropland samples, 1896 were correctly predicted.
